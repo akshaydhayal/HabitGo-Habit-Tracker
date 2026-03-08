@@ -1,5 +1,6 @@
 import { User } from '@my-app/db'
 import z from 'zod'
+import { ObjectId } from 'mongodb'
 
 import { protectedProcedure } from '../index'
 
@@ -22,19 +23,17 @@ export const userRouter = {
       const userId = parseUserId(context.session.user.id)
       console.log('UPDATING PROFILE FOR USER:', userId)
       
-      // Use User.collection to bypass Mongoose's aggressive ObjectId casting 
-      // since better-auth stores 24-char hex strings directly as Strings, not ObjectIds.
-      const result = await User.collection.findOneAndUpdate(
+      const updatedUser = await User.findOneAndUpdate(
         { _id: userId as any },
         { $set: { name: input.name, dob: input.dob, updatedAt: new Date() } },
-        { returnDocument: 'after' }
+        { new: true }
       )
       
-      console.log('Query Result:', result)
+      console.log('Query Result:', updatedUser)
       
-      if (!result) {
+      if (!updatedUser) {
         throw new Error('User not found in database')
       }
-      return result as any
+      return updatedUser.toJSON()
     }),
 }
