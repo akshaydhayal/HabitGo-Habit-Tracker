@@ -36,13 +36,9 @@ export function useSolanaSignIn() {
         statement: 'Sign in to My App',
       })
 
-      // Convert MWA result: both are Base64 strings
-      const signatureBase58 = getBase58Decoder().decode(
-        getBase64Encoder().encode(result.signature),
-      )
-      const messageUtf8 = new TextDecoder().decode(
-        getBase64Encoder().encode(result.message),
-      )
+      // Convert MWA result: the standard returns Uint8Arrays
+      const signatureBase58 = getBase58Decoder().decode(result.signature)
+      const messageUtf8 = new TextDecoder().decode(result.signedMessage)
 
       const { data: verifyData, error: verifyError } =
         await authClient.$fetch<SolanaAuthVerifyResponse>(
