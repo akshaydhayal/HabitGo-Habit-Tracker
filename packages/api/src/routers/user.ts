@@ -1,6 +1,6 @@
 import { User } from '@my-app/db'
 import z from 'zod'
-import { ObjectId } from 'mongodb'
+import mongoose from 'mongoose'
 
 import { protectedProcedure } from '../index'
 
@@ -24,7 +24,7 @@ export const userRouter = {
       console.log('UPDATING PROFILE FOR USER:', userId)
       
       const updatedUser = await User.findOneAndUpdate(
-        { _id: userId as any },
+        { _id: new mongoose.Types.ObjectId(userId) as any },
         { $set: { name: input.name, dob: input.dob, updatedAt: new Date() } },
         { new: true }
       )

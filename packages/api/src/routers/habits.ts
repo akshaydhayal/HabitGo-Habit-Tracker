@@ -1,5 +1,6 @@
 import { Habit } from '@my-app/db'
 import z from 'zod'
+import mongoose from 'mongoose'
 
 import { protectedProcedure } from '../index'
 
@@ -14,7 +15,9 @@ const parseUserId = (id: any): string => {
 export const habitsRouter = {
   getAll: protectedProcedure.handler(async ({ context }) => {
     const userId = parseUserId(context.session.user.id)
-    const habits = await Habit.find({ userId }).sort({ createdAt: -1 })
+    const habits = await Habit.find({ 
+      userId: new mongoose.Types.ObjectId(userId) as any 
+    }).sort({ createdAt: -1 })
     return habits.map((h) => h.toJSON())
   }),
 
@@ -31,7 +34,7 @@ export const habitsRouter = {
       const userId = parseUserId(context.session.user.id)
       const newHabit = await Habit.create({
         ...input,
-        userId,
+        userId: new mongoose.Types.ObjectId(userId) as any,
         history: [],
       })
       return newHabit.toJSON()
@@ -41,7 +44,10 @@ export const habitsRouter = {
     .input(z.object({ id: z.string(), date: z.string(), completed: z.boolean() }))
     .handler(async ({ input, context }) => {
       const userId = parseUserId(context.session.user.id)
-      const habit = await Habit.findOne({ _id: input.id as any, userId })
+      const habit = await Habit.findOne({ 
+        _id: new mongoose.Types.ObjectId(input.id) as any, 
+        userId: new mongoose.Types.ObjectId(userId) as any 
+      })
       
       if (!habit) {
         throw new Error('Habit not found')
@@ -66,7 +72,10 @@ export const habitsRouter = {
     .input(z.object({ id: z.string() }))
     .handler(async ({ input, context }) => {
       const userId = parseUserId(context.session.user.id)
-      await Habit.findOneAndDelete({ _id: input.id as any, userId })
+      await Habit.findOneAndDelete({ 
+        _id: new mongoose.Types.ObjectId(input.id) as any, 
+        userId: new mongoose.Types.ObjectId(userId) as any 
+      })
       return { success: true }
     }),
 }
