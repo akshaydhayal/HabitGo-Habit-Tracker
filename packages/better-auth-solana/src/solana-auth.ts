@@ -103,8 +103,8 @@ export const solanaAuth = (options: SolanaAuthOptions): BetterAuthPlugin => {
 
           if (new Date(nonceRecord.expiresAt) < new Date()) {
             // Delete expired nonce
-            await ctx.context.internalAdapter.deleteVerificationValue(
-              nonceRecord.id,
+            await ctx.context.internalAdapter.deleteVerificationByIdentifier(
+              nonceRecord.identifier,
             )
             throw new APIError('UNAUTHORIZED', {
               message: 'Nonce has expired. Please request a new nonce.',
@@ -125,8 +125,8 @@ export const solanaAuth = (options: SolanaAuthOptions): BetterAuthPlugin => {
           }
 
           // Delete the used nonce (single-use)
-          await ctx.context.internalAdapter.deleteVerificationValue(
-            nonceRecord.id,
+          await ctx.context.internalAdapter.deleteVerificationByIdentifier(
+            nonceRecord.identifier,
           )
 
           // Find or create user
