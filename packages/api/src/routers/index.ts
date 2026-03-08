@@ -3,6 +3,7 @@ import type { RouterClient } from '@orpc/server'
 import { protectedProcedure, publicProcedure } from '../index'
 import { habitsRouter } from './habits'
 import { solanaRouter } from './solana'
+import { userRouter } from './user'
 
 export const appRouter = {
   healthCheck: publicProcedure.handler(() => {
@@ -16,6 +17,7 @@ export const appRouter = {
   }),
   habits: habitsRouter,
   solana: solanaRouter,
+  user: userRouter,
 }
 export type AppRouter = typeof appRouter
 export type AppRouterClient = RouterClient<typeof appRouter>

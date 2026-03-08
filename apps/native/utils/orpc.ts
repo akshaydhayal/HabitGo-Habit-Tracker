@@ -26,15 +26,38 @@ export const link = new RPCLink({
             ...options,
             credentials: 'include',
           }),
-  headers() {
-    if (Platform.OS === 'web') {
-      return {}
-    }
+  headers: async () => {
+    if (Platform.OS === 'web') return {}
+
     const headers = new Map<string, string>()
-    const cookies = authClient.getCookie()
-    if (cookies) {
-      headers.set('Cookie', cookies)
+    
+    // Grab the exact scheme defined in better-auth expoClient config
+    const prefix = 'my-app' 
+    const cookieName = `${prefix}_cookie`
+    
+    try {
+      // SecureStore requires asynchronous reads
+      const { getItemAsync } = require('expo-secure-store')
+      const cookieData = await getItemAsync(cookieName)
+      
+      if (cookieData) {
+        const parsed = JSON.parse(cookieData)
+        const cookieString = Object.entries(parsed).reduce((acc, [key, value]: any) => {
+          if (value.expires && new Date(value.expires) < new Date()) return acc;
+          return acc ? `${acc}; ${key}=${value.value}` : `${key}=${value.value}`;
+        }, "");
+        
+        if (cookieString) {
+          headers.set('Cookie', cookieString)
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to parse secure store cookie', e)
     }
+
+    headers.set('expo-origin', 'exp://my-app')
+    headers.set('x-skip-oauth-proxy', 'true')
+
     return Object.fromEntries(headers)
   },
 })

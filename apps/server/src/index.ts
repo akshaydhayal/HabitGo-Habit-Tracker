@@ -23,7 +23,7 @@ console.log(`  SOLANA_EMAIL_DOMAIN: ${env.SOLANA_EMAIL_DOMAIN}`)
 console.log(`  NODE_ENV: ${env.NODE_ENV}`)
 
 import { connectDB } from '@my-app/db'
-connectDB()
+await connectDB()
 const app = new Hono()
 
 app.use(logger())
@@ -47,7 +47,8 @@ export const apiHandler = new OpenAPIHandler(appRouter, {
   ],
   interceptors: [
     onError((error) => {
-      console.error(error)
+      console.error('[API Error]:', error)
+      if (error instanceof Error && 'cause' in error) console.error('Cause:', error.cause)
     }),
   ],
 })
@@ -55,7 +56,8 @@ export const apiHandler = new OpenAPIHandler(appRouter, {
 export const rpcHandler = new RPCHandler(appRouter, {
   interceptors: [
     onError((error) => {
-      console.error(error)
+      console.error('[RPC Error]:', error)
+      if (error instanceof Error && 'cause' in error) console.error('Cause:', error.cause)
     }),
   ],
 })

@@ -19,17 +19,18 @@ export function UserOnboarding({ defaultName }: { defaultName?: string }) {
 
     setIsSubmitting(true)
     try {
-      // Better-Auth provides an updateUser endpoint
-      await authClient.updateUser({
+      // Call the custom ORPC router we just created instead of authClient
+      await orpc.user.updateProfile.mutateAsync({
         name,
-        // @ts-ignore - custom field
         dob,
       })
+
+      // Refresh the session so Better-Auth knows the local cache is stale
       await authClient.getSession()
       queryClient.invalidateQueries()
-    } catch (error) {
-      console.error('Failed to update profile', error)
-      Alert.alert('Error', 'Failed to save your profile. Try again.')
+    } catch (err: any) {
+      console.error('Failed to update profile', err)
+      Alert.alert('Update Failed', err.message || 'An unexpected error occurred.')
     } finally {
       setIsSubmitting(false)
     }
