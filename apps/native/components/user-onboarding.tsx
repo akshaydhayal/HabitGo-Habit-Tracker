@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { Alert, StyleSheet, Text, View } from 'react-native'
 
 import { authClient } from '@/lib/auth-client'
-import { queryClient } from '@/utils/orpc'
+import { queryClient, orpc } from '@/utils/orpc'
 
 export function UserOnboarding({ defaultName }: { defaultName?: string }) {
   const [name, setName] = useState(defaultName || '')

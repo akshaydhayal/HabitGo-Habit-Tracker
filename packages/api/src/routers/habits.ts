@@ -3,9 +3,17 @@ import z from 'zod'
 
 import { protectedProcedure } from '../index'
 
+// Better-Auth MongoDB adapter sometimes returns the raw ObjectId as { buffer: Uint8Array } instead of a Hex String
+const parseUserId = (id: any): string => {
+  if (typeof id === 'string') return id
+  if (id?.buffer) return Buffer.from(id.buffer).toString('hex')
+  if (id?.toString) return id.toString()
+  return String(id)
+}
+
 export const habitsRouter = {
   getAll: protectedProcedure.handler(async ({ context }) => {
-    const userId = context.session.user.id
+    const userId = parseUserId(context.session.user.id)
     const habits = await Habit.find({ userId }).sort({ createdAt: -1 })
     return habits.map(h => h.toJSON())
   }),
@@ -20,7 +28,7 @@ export const habitsRouter = {
       })
     )
     .handler(async ({ input, context }) => {
-      const userId = context.session.user.id
+      const userId = parseUserId(context.session.user.id)
       const newHabit = await Habit.create({
         ...input,
         userId,
@@ -32,7 +40,7 @@ export const habitsRouter = {
   toggleDay: protectedProcedure
     .input(z.object({ id: z.string(), date: z.string(), completed: z.boolean() }))
     .handler(async ({ input, context }) => {
-      const userId = context.session.user.id
+      const userId = parseUserId(context.session.user.id)
       const habit = await Habit.findOne({ _id: input.id, userId })
       
       if (!habit) {
@@ -56,7 +64,7 @@ export const habitsRouter = {
   delete: protectedProcedure
     .input(z.object({ id: z.string() }))
     .handler(async ({ input, context }) => {
-      const userId = context.session.user.id
+      const userId = parseUserId(context.session.user.id)
       await Habit.findOneAndDelete({ _id: input.id, userId })
       return { success: true }
     }),
