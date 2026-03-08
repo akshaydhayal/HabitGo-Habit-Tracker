@@ -6,12 +6,15 @@ import { useCallback } from 'react'
 import { Pressable, Text } from 'react-native'
 
 import { ThemeToggle } from '@/components/theme-toggle'
+import { authClient } from '@/lib/auth-client'
 
 function DrawerLayout() {
   const themeColorForeground = useThemeColor('foreground')
   const themeColorBackground = useThemeColor('background')
+  const { data: session } = authClient.useSession()
 
   const renderThemeToggle = useCallback(() => <ThemeToggle />, [])
+  const isFullyOnboarded = session?.user && (session.user as any).dob
 
   return (
     <Drawer
@@ -44,42 +47,15 @@ function DrawerLayout() {
           ),
         }}
       />
-      <Drawer.Screen
-        name="(tabs)"
-        options={{
-          headerTitle: 'Tabs',
-          drawerLabel: ({ color, focused }) => (
-            <Text style={{ color: focused ? color : themeColorForeground }}>
-              Tabs
-            </Text>
-          ),
-          drawerIcon: ({ size, color, focused }) => (
-            <MaterialIcons
-              name="border-bottom"
-              size={size}
-              color={focused ? color : themeColorForeground}
-            />
-          ),
-          headerRight: () => (
-            <Link href="/modal" asChild>
-              <Pressable className="mr-4">
-                <Ionicons
-                  name="add-outline"
-                  size={24}
-                  color={themeColorForeground}
-                />
-              </Pressable>
-            </Link>
-          ),
-        }}
-      />
+      {/* Only show the Habits screen to users who are logged in and have finished onboarding */}
       <Drawer.Screen
         name="habits"
         options={{
-          headerTitle: 'Habits',
+          headerTitle: 'Habits Tracker',
+          drawerItemStyle: isFullyOnboarded ? undefined : { display: 'none' },
           drawerLabel: ({ color, focused }) => (
             <Text style={{ color: focused ? color : themeColorForeground }}>
-              Habits
+              Habits Tracker
             </Text>
           ),
           drawerIcon: ({ size, color, focused }) => (
@@ -91,40 +67,27 @@ function DrawerLayout() {
           ),
         }}
       />
+
+      {/* Hide Tabs, AI, and Solana examples for cleaner UI production flow */}
+      <Drawer.Screen
+        name="(tabs)"
+        options={{
+          drawerItemStyle: { display: 'none' },
+          headerTitle: 'Tabs',
+        }}
+      />
       <Drawer.Screen
         name="ai"
         options={{
+          drawerItemStyle: { display: 'none' },
           headerTitle: 'AI',
-          drawerLabel: ({ color, focused }) => (
-            <Text style={{ color: focused ? color : themeColorForeground }}>
-              AI
-            </Text>
-          ),
-          drawerIcon: ({ size, color, focused }) => (
-            <Ionicons
-              name="chatbubble-ellipses-outline"
-              size={size}
-              color={focused ? color : themeColorForeground}
-            />
-          ),
         }}
       />
       <Drawer.Screen
         name="solana"
         options={{
+          drawerItemStyle: { display: 'none' },
           headerTitle: 'Solana',
-          drawerLabel: ({ color, focused }) => (
-            <Text style={{ color: focused ? color : themeColorForeground }}>
-              Solana
-            </Text>
-          ),
-          drawerIcon: ({ size, color, focused }) => (
-            <Ionicons
-              name="wallet-outline"
-              size={size}
-              color={focused ? color : themeColorForeground}
-            />
-          ),
         }}
       />
     </Drawer>
