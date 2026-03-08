@@ -11,29 +11,30 @@ export function UserOnboarding({ defaultName }: { defaultName?: string }) {
   const [dob, setDob] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const handleUpdateProfile = async () => {
+  const updateProfileMutation = useMutation(
+    orpc.user.updateProfile.mutationOptions({
+      onSuccess: async () => {
+        // Refresh the session so Better-Auth knows the local cache is stale
+        await authClient.getSession()
+        queryClient.invalidateQueries()
+        setIsSubmitting(false)
+      },
+      onError: (err: any) => {
+        console.error('Failed to update profile', err)
+        Alert.alert('Update Failed', err.message || 'An unexpected error occurred.')
+        setIsSubmitting(false)
+      }
+    })
+  )
+
+  const handleUpdateProfile = () => {
     if (!name.trim() || !dob.trim()) {
       Alert.alert('Missing Info', 'Please fill out both your name and Date of Birth.')
       return
     }
 
     setIsSubmitting(true)
-    try {
-      // Call the custom ORPC router we just created instead of authClient
-      await orpc.user.updateProfile.mutateAsync({
-        name,
-        dob,
-      })
-
-      // Refresh the session so Better-Auth knows the local cache is stale
-      await authClient.getSession()
-      queryClient.invalidateQueries()
-    } catch (err: any) {
-      console.error('Failed to update profile', err)
-      Alert.alert('Update Failed', err.message || 'An unexpected error occurred.')
-    } finally {
-      setIsSubmitting(false)
-    }
+    updateProfileMutation.mutate({ name, dob })
   }
 
   return (
