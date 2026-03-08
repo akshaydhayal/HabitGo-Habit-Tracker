@@ -8,6 +8,10 @@ export type CreateContextOptions = {
 }
 
 export async function createContext({ context }: CreateContextOptions) {
+  const authHeader = context.req.header('Authorization')
+  const cookieHeader = context.req.header('Cookie')
+  console.log(`[Context] Auth: ${authHeader ? 'YES' : 'NO'}, Cookie: ${cookieHeader ? 'YES' : 'NO'}`)
+
   const session = await auth.api.getSession({
     headers: context.req.raw.headers,
   })
