@@ -6,10 +6,10 @@ import {
   Text,
   View,
   Pressable,
-  SafeAreaView,
   Dimensions,
   Image,
 } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 const { width } = Dimensions.get('window')
 const CARD_WIDTH = (width - 48) / 2
@@ -31,9 +31,10 @@ const SUGGESTIONS = [
 
 export default function BreakBadHabitScreen() {
   const router = useRouter()
+  const insets = useSafeAreaInsets()
 
   return (
-    <SafeAreaView className="flex-1 bg-[#0A0A0A]">
+    <View style={{ paddingTop: insets.top }} className="flex-1 bg-[#0A0A0A]">
       <View className="px-5 py-4 flex-row items-center border-b border-white/5">
         <Pressable onPress={() => router.back()} className="mr-4">
           <Ionicons name="close" size={28} color="white" />
@@ -90,6 +91,6 @@ export default function BreakBadHabitScreen() {
            <Text className="text-white font-bold text-lg">Create Your Own</Text>
         </Pressable>
       </View>
-    </SafeAreaView>
+    </View>
   )
 }

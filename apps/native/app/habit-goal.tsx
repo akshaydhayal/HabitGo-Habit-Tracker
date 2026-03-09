@@ -5,8 +5,8 @@ import {
   Text,
   View,
   Pressable,
-  SafeAreaView,
 } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 export default function HabitGoalScreen() {
   const router = useRouter()
@@ -28,8 +28,10 @@ export default function HabitGoalScreen() {
     }
   }
 
+  const insets = useSafeAreaInsets()
+
   return (
-    <SafeAreaView className="flex-1 bg-[#0A0A0A]">
+    <View style={{ paddingTop: insets.top }} className="flex-1 bg-[#0A0A0A]">
       <View className="px-5 py-4 flex-row items-center border-b border-white/5">
         <Pressable onPress={() => router.back()} className="mr-4">
           <Ionicons name="arrow-back" size={24} color="white" />
@@ -60,6 +62,6 @@ export default function HabitGoalScreen() {
           {currentType === 'limit' && <Ionicons name="checkmark" size={24} color="#3b82f6" />}
         </Pressable>
       </View>
-    </SafeAreaView>
+    </View>
   )
 }

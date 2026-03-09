@@ -7,14 +7,34 @@ import {
   Pressable,
   SafeAreaView,
   StyleSheet,
+  Modal,
+  Dimensions,
 } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { orpc } from '@/utils/orpc'
 import { useQueryClient, useMutation } from '@tanstack/react-query'
+
+const { width } = Dimensions.get('window')
+const COLUMN_WIDTH = (width - 80) / 7 // Modal padding adjustment
+
+const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+const MONTHS = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'
+]
 
 export default function HabitConfigScreen() {
   const router = useRouter()
   const params = useLocalSearchParams()
   const queryClient = useQueryClient()
+  const insets = useSafeAreaInsets()
+
+  const toLocalISOString = (date: Date) => {
+    const y = date.getFullYear()
+    const m = String(date.getMonth() + 1).padStart(2, '0')
+    const d = String(date.getDate()).padStart(2, '0')
+    return `${y}-${m}-${d}`
+  }
   
   const [name, setName] = useState(params.name as string || '')
   const [color, setColor] = useState(params.color as string || '#3b82f6')
@@ -28,7 +48,10 @@ export default function HabitConfigScreen() {
   const [goalFrequency, setGoalFrequency] = useState(params.goalFrequency as string || 'per week')
   
   // Date state
-  const [startDate, setStartDate] = useState(params.startDate as string || new Date().toISOString().split('T')[0])
+  const today = toLocalISOString(new Date())
+  const [startDate, setStartDate] = useState(params.startDate as string || today)
+  const [isCalendarVisible, setIsCalendarVisible] = useState(false)
+  const [viewDate, setViewDate] = useState(new Date(startDate))
 
   const createHabit = useMutation({
     ...orpc.habits.create.mutationOptions(),
@@ -41,6 +64,10 @@ export default function HabitConfigScreen() {
 
   // Update state when params change (from sub-screens)
   useEffect(() => {
+    if (params.name) setName(params.name as string)
+    if (params.color) setColor(params.color as string)
+    if (params.icon) setIcon(params.icon as string)
+    if (params.type) setType(params.type as any)
     if (params.badHabitType) setBadHabitType(params.badHabitType as any)
     if (params.goalValue) setGoalValue(Number(params.goalValue))
     if (params.goalUnit) setGoalUnit(params.goalUnit as string)
@@ -62,16 +89,27 @@ export default function HabitConfigScreen() {
     })
   }
 
+  // Calendar Logic
+  const year = viewDate.getFullYear()
+  const month = viewDate.getMonth()
+  const firstDayOfMonth = new Date(year, month, 1).getDay()
+  const emptyDays = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1
+  const daysInMonth = new Date(year, month + 1, 0).getDate()
+  const calendarDays = Array.from({ length: daysInMonth }, (_, i) => {
+    const d = new Date(year, month, i + 1)
+    return { label: (i + 1).toString(), value: toLocalISOString(d) }
+  })
+
   const goalText = badHabitType === 'stop' 
     ? 'Quit This Habit' 
     : `No more than ${goalValue} ${goalUnit} ${goalFrequency}`
 
-  const dateText = startDate === new Date().toISOString().split('T')[0]
+  const dateText = startDate === today
     ? 'Start from Today'
     : `Starts on ${startDate}`
 
   return (
-    <SafeAreaView className="flex-1 bg-[#0A0A0A]">
+    <View style={{ paddingTop: insets.top }} className="flex-1 bg-[#0A0A0A]">
       <View className="px-5 py-4 flex-row items-center justify-between border-b border-white/5">
         <Pressable onPress={() => router.back()}>
           <Ionicons name="close" size={28} color="white" />
@@ -102,7 +140,7 @@ export default function HabitConfigScreen() {
           <Pressable 
             onPress={() => router.push({
               pathname: '/habit-goal',
-              params: { badHabitType, goalValue, goalUnit, goalFrequency }
+              params: { name, color, icon, type, badHabitType, goalValue, goalUnit, goalFrequency, startDate }
             })}
             className="flex-row items-center justify-between py-6 border-b border-white/5"
           >
@@ -114,15 +152,7 @@ export default function HabitConfigScreen() {
           </Pressable>
 
           <Pressable 
-            onPress={() => {
-              // For now simpler date selection or just navigate to a placeholder calendat
-              // In production we'd use a real calendar, but here we can just mock it or use an alert
-              // Let's stick to the flow and use a placeholder
-              router.push({
-                pathname: '/habit-date',
-                params: { startDate }
-              })
-            }}
+            onPress={() => setIsCalendarVisible(true)}
             className="flex-row items-center justify-between py-6 border-b border-white/5"
           >
             <View className="flex-row items-center gap-4">
@@ -133,6 +163,94 @@ export default function HabitConfigScreen() {
           </Pressable>
         </View>
       </View>
-    </SafeAreaView>
+
+      {/* Calendar Modal */}
+      <Modal
+        visible={isCalendarVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setIsCalendarVisible(false)}
+      >
+        <Pressable 
+          onPress={() => setIsCalendarVisible(false)}
+          className="flex-1 bg-black/80 items-center justify-center px-5"
+        >
+          <Pressable onPress={(e) => e.stopPropagation()} className="bg-[#1C1C1E] w-full rounded-3xl overflow-hidden border border-white/10">
+            <View className="p-6">
+              <View className="flex-row items-center justify-between mb-8">
+                <Text className="text-white text-xl font-bold">
+                  {MONTHS[month]} {year}
+                </Text>
+                <View className="flex-row gap-4">
+                  <Pressable 
+                    onPress={() => setViewDate(new Date(year, month - 1, 1))}
+                    className="h-8 w-8 bg-zinc-800 rounded-full items-center justify-center"
+                  >
+                    <Ionicons name="chevron-back" size={16} color="white" />
+                  </Pressable>
+                  <Pressable 
+                    onPress={() => setViewDate(new Date(year, month + 1, 1))}
+                    className="h-8 w-8 bg-zinc-800 rounded-full items-center justify-center"
+                  >
+                    <Ionicons name="chevron-forward" size={16} color="white" />
+                  </Pressable>
+                </View>
+              </View>
+
+              <View className="flex-row mb-4">
+                {DAYS.map(day => (
+                  <View key={day} style={{ width: COLUMN_WIDTH }} className="items-center">
+                    <Text className="text-zinc-600 font-bold text-[10px] uppercase">{day}</Text>
+                  </View>
+                ))}
+              </View>
+
+              <View className="flex-row flex-wrap">
+                {Array.from({ length: emptyDays }).map((_, i) => (
+                  <View key={`empty-${i}`} style={{ width: COLUMN_WIDTH }} className="h-10" />
+                ))}
+                
+                {calendarDays.map((d) => {
+                  const isSelected = startDate === d.value
+                  const isToday = today === d.value
+                  
+                  return (
+                    <Pressable 
+                      key={d.value} 
+                      onPress={() => {
+                        setStartDate(d.value)
+                        setIsCalendarVisible(false)
+                      }}
+                      style={{ width: COLUMN_WIDTH }}
+                      className="h-10 items-center justify-center"
+                    >
+                      <View className={`h-8 w-8 rounded-full items-center justify-center ${
+                        isSelected ? 'bg-[#3b82f6]' : isToday ? 'bg-zinc-800' : ''
+                      }`}>
+                        <Text className={`text-sm font-medium ${
+                          isSelected ? 'text-white' : isToday ? 'text-[#3b82f6]' : 'text-zinc-300'
+                        }`}>
+                          {d.label}
+                        </Text>
+                      </View>
+                    </Pressable>
+                  )
+                })}
+              </View>
+              
+              <Pressable 
+                onPress={() => {
+                  setStartDate(today)
+                  setIsCalendarVisible(false)
+                }}
+                className="mt-8 py-3 rounded-xl bg-zinc-800 items-center"
+              >
+                <Text className="text-white font-bold">Reset to Today</Text>
+              </Pressable>
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
+    </View>
   )
 }

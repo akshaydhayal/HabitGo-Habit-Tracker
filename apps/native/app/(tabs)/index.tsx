@@ -6,10 +6,10 @@ import {
   Text,
   View,
   Pressable,
-  SafeAreaView,
   Dimensions,
 } from 'react-native'
 import Animated, { FadeInDown } from 'react-native-reanimated'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { Container } from '@/components/container'
 import { authClient } from '@/lib/auth-client'
@@ -30,6 +30,7 @@ export default function JournalScreen() {
   const { data: habits, isLoading } = useQuery(orpc.habits.getAll.queryOptions())
   const { data: session } = authClient.useSession()
   const scrollRef = useRef<ScrollView>(null)
+  const insets = useSafeAreaInsets()
 
   const dates = useRef(
     Array.from({ length: 30 }, (_, i) => {
@@ -53,7 +54,7 @@ export default function JournalScreen() {
   const goodHabits = visibleHabits.filter(h => h.type === 'good' && !negativeHabits.find(nh => nh._id === h._id))
 
   return (
-    <SafeAreaView className="flex-1 bg-[#0A0A0A]">
+    <View style={{ paddingTop: insets.top }} className="flex-1 bg-[#0A0A0A]">
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         <View className="px-5 pt-8 mb-6">
           <Text className="text-[#71717a] text-[11px] font-bold tracking-widest uppercase mb-1">
@@ -249,6 +250,6 @@ export default function JournalScreen() {
         isVisible={isActionSheetVisible} 
         onClose={() => setIsActionSheetVisible(false)} 
       />
-    </SafeAreaView>
+    </View>
   )
 }
