@@ -36,8 +36,12 @@ export async function createContext({ context }: CreateContextOptions) {
   // MANUAL TOKEN RESCUE
   // If getSession fails but we HAVE an Authorization header, try to manually find the session
   if (!session && authHeader?.startsWith('Bearer ')) {
-    const tokenValue = authHeader.split(' ')[1]?.trim()
-    console.log(`[Context] getSession failed. DB: ${mongoDb.databaseName}. Attempting Rescue for token: ${tokenValue?.substring(0, 5)}...`)
+    let tokenValue = authHeader.split(' ')[1]?.trim()
+    if (tokenValue?.includes('.')) {
+      console.log(`[Context] Signed token detected (len ${tokenValue.length}). Splitting...`)
+      tokenValue = tokenValue.split('.')[0]
+    }
+    console.log(`[Context] getSession failed. DB: ${mongoDb.databaseName}. Attempting Rescue for token: ${tokenValue?.substring(0, 5)}... (len: ${tokenValue?.length})`)
     
     try {
       if (tokenValue) {

@@ -133,6 +133,7 @@ export const solanaAuth = (options: SolanaAuthOptions): BetterAuthPlugin => {
           const adapter = ctx.context.adapter
 
           // Check if wallet is already linked to a user
+          console.log(`[SolanaAuth] Checking wallet: ${walletAddress} (cluster: ${cluster})`)
           const result = await adapter.findOne({
             model: 'walletAddress',
             where: [
@@ -140,6 +141,7 @@ export const solanaAuth = (options: SolanaAuthOptions): BetterAuthPlugin => {
               { field: 'cluster', value: cluster },
             ],
           })
+          console.log(`[SolanaAuth] Lookup Result: ${result ? 'Found' : 'NOT Found'}`)
 
           const walletSchema = z.object({
             userId: z.string(),
