@@ -14,7 +14,7 @@ import { cors } from 'hono/cors'
 import { logger } from 'hono/logger'
 
 console.log('🚀 Server starting...')
-console.log(`  DATABASE_URL: ${new URL(env.DATABASE_URL).origin}`)
+console.log(`  DATABASE_URL: ${env.DATABASE_URL.replace(/:[^:]+@/, ':****@')}`) // Mask password
 console.log(`  BETTER_AUTH_URL: ${env.BETTER_AUTH_URL}`)
 console.log(`  CORS_ORIGINS: ${env.CORS_ORIGINS.join(', ')}`)
 console.log(`  SOLANA_CLUSTER: ${env.SOLANA_CLUSTER}`)

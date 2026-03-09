@@ -61,6 +61,12 @@ export async function createContext({ context }: CreateContextOptions) {
         
         if (!sessionRecord) {
           console.log(`[Context] Rescue Failed: No match found among ${allSessions.length} records.`)
+          console.log('[Context] --- DUMPING ALL SESSION TOKENS ---')
+          allSessions.forEach((s, i) => {
+            const t = s.token || s.sessionToken
+            console.log(`  [${i}] Len: ${t?.length}, Prefix: ${t?.substring(0, 10)}... Suffix: ...${t?.substring(t.length - 5)}`)
+          })
+          console.log(`[Context] Seeking Token Len: ${tokenValue.length}, Prefix: ${tokenValue.substring(0, 10)}...`)
         } else if (new Date(sessionRecord.expiresAt) < new Date()) {
           console.log('[Context] Rescue Failed: Session found but expired.')
         } else {
