@@ -35,34 +35,37 @@ export const HabitActionSheet = ({ isVisible, onClose }: HabitActionSheetProps) 
           
           <View className="px-6 pt-2 pb-10 gap-4">
              <Pressable 
-               className="flex-row items-center gap-4 py-4 active:opacity-60"
+               className="flex-row items-center gap-4 py-0 active:opacity-60"
                onPress={onClose}
              >
-                <View className="h-12 w-12 rounded-full bg-[#3b82f6] items-center justify-center">
+                <View className="h-10 w-10 rounded-full bg-[#3b82f6] items-center justify-center">
                    <Ionicons name="leaf" size={24} color="white" />
                 </View>
                 <Text className="text-white text-xl font-semibold">Create Good Habit</Text>
              </Pressable>
 
              <Pressable 
-               className="flex-row items-center gap-4 py-4 active:opacity-60"
+               className="flex-row items-center gap-4 py-0 active:opacity-60"
                onPress={() => {
                  onClose()
                  router.push('/break-bad-habit')
                }}
              >
-                <View className="h-12 w-12 rounded-full bg-zinc-800 items-center justify-center">
-                   <Ionicons name="ban" size={24} color="white" />
+                <View className="h-10 w-10 rounded-full bg-zinc-600 items-center justify-center">
+                   <Ionicons name="ban" size={28} color="white" />
                 </View>
                 <Text className="text-white text-xl font-semibold">Break Bad Habit</Text>
              </Pressable>
 
              <Pressable 
-               className="flex-row items-center gap-4 py-4 active:opacity-60"
-               onPress={onClose}
+               className="flex-row items-center gap-4 py-0 active:opacity-60"
+               onPress={() => {
+                 onClose()
+                 router.push('/log-mood')
+               }}
              >
-                <View className="h-12 w-12 rounded-full bg-orange-500/20 items-center justify-center">
-                   <Ionicons name="happy" size={28} color="#FF9500" />
+                <View className="h-10 w-10 rounded-full bg-orange-900 items-center justify-center">
+                   <Ionicons name="happy" size={36} color="#FF9500" />
                 </View>
                 <Text className="text-white text-xl font-semibold">Log mood</Text>
              </Pressable>

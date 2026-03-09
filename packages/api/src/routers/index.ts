@@ -2,6 +2,7 @@ import type { RouterClient } from '@orpc/server'
 
 import { protectedProcedure, publicProcedure } from '../index'
 import { habitsRouter } from './habits'
+import { moodsRouter } from './moods'
 import { solanaRouter } from './solana'
 import { userRouter } from './user'
 
@@ -16,6 +17,7 @@ export const appRouter = {
     }
   }),
   habits: habitsRouter,
+  moods: moodsRouter,
   solana: solanaRouter,
   user: userRouter,
 }

@@ -23,11 +23,20 @@ const FILTERS = [
   { id: 'new', label: 'New', icon: 'add' },
 ]
 
+const MOOD_EMOJIS: Record<string, string> = {
+  'Terrible': '😣',
+  'Bad': '😕',
+  'Okay': '😐',
+  'Good': '😊',
+  'Excellent': '🤩',
+}
+
 export default function JournalScreen() {
   const [activeFilter, setActiveFilter] = useState('all')
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0])
   const [isActionSheetVisible, setIsActionSheetVisible] = useState(false)
-  const { data: habits, isLoading } = useQuery(orpc.habits.getAll.queryOptions())
+  const { data: habits, isLoading: isLoadingHabits } = useQuery(orpc.habits.getAll.queryOptions())
+  const { data: moods, isLoading: isLoadingMoods } = useQuery(orpc.moods.getAll.queryOptions({ date: selectedDate }))
   const { data: session } = authClient.useSession()
   const scrollRef = useRef<ScrollView>(null)
   const insets = useSafeAreaInsets()
@@ -141,7 +150,7 @@ export default function JournalScreen() {
                   </View>
                 ))}
              </View>
-           ) : !isLoading && selectedDate === new Date().toISOString().split('T')[0] && (
+           ) : !isLoadingHabits && selectedDate === new Date().toISOString().split('T')[0] && (
              <Text className="text-gray-500 text-center py-4">No good habits for today</Text>
            )}
 
@@ -176,23 +185,39 @@ export default function JournalScreen() {
            )}
 
            <View>
-             <View className="flex-row items-center justify-between mb-6">
-                <Text className="text-white font-bold text-xl">1 Mood Logged</Text>
+             {/* Mood Section */}
+             <View className="flex-row items-center justify-between mb-4 mt-8">
+                <Text className="text-white font-bold text-xl">{moods?.length || 0} Mood Logged</Text>
                 <Ionicons name="chevron-up" size={20} color="#71717a" />
              </View>
 
-             <View className="flex-row items-center gap-3 mb-6">
-                <View className="h-10 w-10 rounded-full bg-yellow-500/10 items-center justify-center">
-                   <Ionicons name="happy" size={28} color="#FF9500" />
-                </View>
-                <View className="flex-1">
-                   <Text className="text-white font-bold text-lg">Good</Text>
-                </View>
-                <View className="flex-row items-center gap-1">
-                   <Ionicons name="document-text" size={14} color="#71717a" />
-                   <Text className="text-gray-500 text-sm">17:06</Text>
-                </View>
-             </View>
+             {(moods || []).map((m) => (
+               <Pressable 
+                 key={m._id} 
+                 onPress={() => router.push({
+                   pathname: '/mood-detail',
+                   params: {
+                     mood: m.mood,
+                     date: m.date,
+                     time: m.time,
+                     activities: m.activities.join(','),
+                     context: m.context
+                   }
+                 })}
+                 className="flex-row items-center gap-3 mb-6"
+               >
+                  <View className="h-10 w-10 rounded-full bg-zinc-800 items-center justify-center">
+                     <Text style={{ fontSize: 24 }}>{MOOD_EMOJIS[m.mood]}</Text>
+                  </View>
+                  <View className="flex-1">
+                     <Text className="text-white font-bold text-lg">{m.mood}</Text>
+                  </View>
+                  <View className="flex-row items-center gap-1">
+                     <Ionicons name="document-text" size={14} color="#71717a" />
+                     <Text className="text-gray-500 text-sm">{m.time}</Text>
+                  </View>
+               </Pressable>
+             ))}
            </View>
 
           {/* Swipe Tip Card */}

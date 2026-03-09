@@ -24,3 +24,4 @@ export const mongoDb = client.db()
 // Export all Mongoose schemas
 export * from './models/User'
 export * from './models/Habit'
+export * from './models/Mood'
