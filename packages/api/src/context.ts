@@ -10,11 +10,20 @@ export type CreateContextOptions = {
 export async function createContext({ context }: CreateContextOptions) {
   const authHeader = context.req.header('Authorization')
   const cookieHeader = context.req.header('Cookie')
-  console.log(`[Context] Auth: ${authHeader ? 'YES' : 'NO'}, Cookie: ${cookieHeader ? 'YES' : 'NO'}`)
+  
+  const headers = new Headers()
+  if (authHeader) headers.set('Authorization', authHeader)
+  if (cookieHeader) headers.set('Cookie', cookieHeader)
 
   const session = await auth.api.getSession({
-    headers: context.req.raw.headers,
+    headers,
   })
+
+  if (session) {
+    console.log(`[Context] Session found for user: ${session.user.id}`)
+  } else {
+    console.log(`[Context] No session found. Headers present: Auth=${!!authHeader}, Cookie=${!!cookieHeader}`)
+  }
 
   const solana = createSolanaClient({
     url: env.SOLANA_ENDPOINT,
