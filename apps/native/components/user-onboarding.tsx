@@ -2,6 +2,7 @@ import { useMutation } from '@tanstack/react-query'
 import { Button, Input, Spinner, Surface, TextField } from 'heroui-native'
 import { useState } from 'react'
 import { Alert, StyleSheet, Text, View } from 'react-native'
+import { useRouter } from 'expo-router'
 
 import { authClient } from '@/lib/auth-client'
 import { queryClient, orpc } from '@/utils/orpc'
@@ -10,14 +11,16 @@ export function UserOnboarding({ defaultName }: { defaultName?: string }) {
   const [name, setName] = useState(defaultName || '')
   const [dob, setDob] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const router = useRouter()
 
   const updateProfileMutation = useMutation(
     orpc.user.updateProfile.mutationOptions({
       onSuccess: async () => {
         // Refresh the session so Better-Auth knows the local cache is stale
         await authClient.getSession()
-        queryClient.invalidateQueries()
+        await queryClient.invalidateQueries()
         setIsSubmitting(false)
+        router.replace('/habits')
       },
       onError: (err: any) => {
         console.error('Failed to update profile', err)
