@@ -31,7 +31,12 @@ export const habitsRouter = {
         goalValue: z.number().optional(),
         goalUnit: z.string().optional(),
         goalFrequency: z.string().optional(),
+        repeatMode: z.enum(['weekly', 'monthly']).optional(),
+        weeklyDays: z.array(z.string()).optional(),
+        monthlyDays: z.array(z.number()).optional(),
+        reminders: z.array(z.string()).optional(),
         startDate: z.string(), // YYYY-MM-DD
+        endDate: z.string().optional(),
         frequency: z.array(z.string()).default(['Daily']),
         color: z.string().optional(),
       })

@@ -3,12 +3,14 @@ import { useRouter, useLocalSearchParams } from 'expo-router'
 import React, { useState, useEffect } from 'react'
 import {
   Text,
+  TextInput,
   View,
   Pressable,
   SafeAreaView,
   StyleSheet,
   Modal,
   Dimensions,
+  ScrollView,
 } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { orpc } from '@/utils/orpc'
@@ -24,6 +26,13 @@ const MONTHS = [
   'July', 'August', 'September', 'October', 'November', 'December'
 ]
 
+const ICON_LIST = [
+  'leaf', 'fitness', 'book', 'pencil', 'list', 'barbell', 'water', 'body', 
+  'accessibility', 'heart', 'bicycle', 'walk', 'moon', 'cube', 'nutrition', 
+  'cafe', 'code', 'musical-notes', 'football', 'timer', 'restaurant', 'flame',
+  'star', 'trophy', 'rocket', 'sunny', 'cloudy-night', 'medal'
+]
+
 export default function HabitConfigScreen() {
   const router = useRouter()
   const params = useLocalSearchParams()
@@ -37,15 +46,23 @@ export default function HabitConfigScreen() {
   const [type, setType] = useState(params.type as 'good' | 'bad' || 'bad')
   
   // Goal state
-  const [badHabitType, setBadHabitType] = useState<'stop' | 'limit'>(params.badHabitType as any || 'stop')
-  const [goalValue, setGoalValue] = useState(Number(params.goalValue) || 1)
+  const [badHabitType, setBadHabitType] = useState<'stop' | 'limit'>(params.badHabitType as any || 'limit')
+  const [goalValue, setGoalValue] = useState(params.goalValue?.toString() || '1')
   const [goalUnit, setGoalUnit] = useState(params.goalUnit as string || 'times')
-  const [goalFrequency, setGoalFrequency] = useState(params.goalFrequency as string || 'per week')
+  const [goalFrequency, setGoalFrequency] = useState(params.goalFrequency as string || 'per day')
+  
+  // Customization state
+  const [repeatMode, setRepeatMode] = useState<'weekly' | 'monthly'>(params.repeatMode as any || 'weekly')
+  const [weeklyDays, setWeeklyDays] = useState(params.weeklyDays as string || 'Mon,Tue,Wed,Thu,Fri,Sat,Sun')
+  const [monthlyDays, setMonthlyDays] = useState(params.monthlyDays as string || '1')
+  const [reminders, setReminders] = useState(params.reminders as string || '')
   
   // Date state
   const today = toLocalISOString(new Date())
   const [startDate, setStartDate] = useState(params.startDate as string || today)
+  const [endDate, setEndDate] = useState(params.endDate as string || '')
   const [isCalendarVisible, setIsCalendarVisible] = useState(false)
+  const [isIconPickerVisible, setIsIconPickerVisible] = useState(false)
   const [viewDate, setViewDate] = useState(new Date(startDate))
 
   const createHabit = useMutation({
@@ -64,23 +81,33 @@ export default function HabitConfigScreen() {
     if (params.icon) setIcon(params.icon as string)
     if (params.type) setType(params.type as any)
     if (params.badHabitType) setBadHabitType(params.badHabitType as any)
-    if (params.goalValue) setGoalValue(Number(params.goalValue))
+    if (params.goalValue) setGoalValue(params.goalValue?.toString())
     if (params.goalUnit) setGoalUnit(params.goalUnit as string)
     if (params.goalFrequency) setGoalFrequency(params.goalFrequency as string)
+    if (params.repeatMode) setRepeatMode(params.repeatMode as any)
+    if (params.weeklyDays) setWeeklyDays(params.weeklyDays as string)
+    if (params.monthlyDays) setMonthlyDays(params.monthlyDays as string)
+    if (params.reminders) setReminders(params.reminders as string)
     if (params.startDate) setStartDate(params.startDate as string)
+    if (params.endDate !== undefined) setEndDate(params.endDate as string)
   }, [params])
 
   const handleSave = () => {
     createHabit.mutate({
       name,
       type,
-      badHabitType,
-      goalValue: badHabitType === 'limit' ? goalValue : undefined,
-      goalUnit: badHabitType === 'limit' ? goalUnit : undefined,
-      goalFrequency: badHabitType === 'limit' ? goalFrequency : undefined,
+      badHabitType: type === 'bad' ? badHabitType : undefined,
+      goalValue: Number(goalValue),
+      goalUnit,
+      goalFrequency,
+      repeatMode,
+      weeklyDays: repeatMode === 'weekly' ? weeklyDays.split(',') : undefined,
+      monthlyDays: repeatMode === 'monthly' ? monthlyDays.split(',').map(Number) : undefined,
+      reminders: reminders ? reminders.split(',') : [],
       startDate,
+      endDate: endDate || undefined,
       color,
-      frequency: ['Daily'], // Default for now
+      frequency: repeatMode === 'weekly' ? weeklyDays.split(',') : ['Daily'],
     })
   }
 
@@ -95,13 +122,27 @@ export default function HabitConfigScreen() {
     return { label: (i + 1).toString(), value: toLocalISOString(d) }
   })
 
-  const goalText = badHabitType === 'stop' 
-    ? 'Quit This Habit' 
-    : `No more than ${goalValue} ${goalUnit} ${goalFrequency}`
+  const goalText = type === 'bad' && badHabitType === 'stop'
+    ? 'Quit This Habit'
+    : `${goalValue} ${goalUnit} ${goalFrequency}`
 
   const dateText = startDate === today
     ? 'Start from Today'
     : `Starts on ${startDate}`
+    
+  const repeatText = repeatMode === 'weekly' 
+    ? (weeklyDays.split(',').length === 7 ? 'Everyday' : `Weekly (${weeklyDays.split(',').length} days)`)
+    : `Monthly (${monthlyDays.split(',').length} days)`
+
+  const remindersText = reminders 
+    ? (reminders.split(',').length === 1 ? reminders : `${reminders.split(',').length} reminders`)
+    : 'No reminders'
+
+  const endText = endDate && endDate !== 'null' && endDate !== '' 
+    ? `Ends on ${endDate}` 
+    : 'Never end'
+
+  const configParams = { name, color, icon, type, badHabitType, goalValue, goalUnit, goalFrequency, repeatMode, weeklyDays, monthlyDays, reminders, startDate, endDate }
 
   return (
     <View style={{ paddingTop: insets.top }} className="flex-1 bg-[#0A0A0A]">
@@ -122,41 +163,136 @@ export default function HabitConfigScreen() {
 
       <View className="px-5 pt-8">
         <View className="flex-row items-center gap-4 mb-10">
-          <View 
+          <Pressable 
+            onPress={() => setIsIconPickerVisible(true)}
             style={{ backgroundColor: `${color}20` }} 
             className="h-14 w-14 rounded-2xl items-center justify-center"
           >
             <Ionicons name={icon as any} size={32} color={color} />
-          </View>
-          <Text className="text-white text-2xl font-bold">{name}</Text>
+            <View className="absolute -bottom-1 -right-1 bg-zinc-800 rounded-full p-0.5 border border-black">
+               <Ionicons name="pencil" size={10} color="white" />
+            </View>
+          </Pressable>
+          <TextInput
+            value={name}
+            onChangeText={setName}
+            placeholder="Habit Name"
+            placeholderTextColor="#71717a"
+            className="text-white text-2xl font-bold flex-1"
+          />
         </View>
 
-        <View className="gap-2">
-          <Pressable 
-            onPress={() => router.push({
-              pathname: '/habit-goal',
-              params: { name, color, icon, type, badHabitType, goalValue, goalUnit, goalFrequency, startDate }
-            })}
-            className="flex-row items-center justify-between py-6 border-b border-white/5"
-          >
-            <View className="flex-row items-center gap-4">
-              <Ionicons name="locate" size={24} color="#71717a" />
-              <Text className="text-white text-lg font-medium">{goalText}</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={20} color="#71717a" />
-          </Pressable>
+        <ScrollView className="gap-2 pb-20" showsVerticalScrollIndicator={false}>
+          {type === 'good' ? (
+            <>
+              {/* 1. Repeat */}
+              <Pressable 
+                onPress={() => router.push({ pathname: '/habit-repeat', params: configParams })}
+                className="flex-row items-center justify-between py-6 border-b border-white/5"
+              >
+                <View className="flex-row items-center gap-4">
+                  <Ionicons name="repeat" size={24} color="#71717a" />
+                  <View>
+                     <Text className="text-[#71717a] text-xs font-bold uppercase mb-1">Repeat</Text>
+                     <Text className="text-white text-lg font-medium">{repeatText}</Text>
+                  </View>
+                </View>
+                <Ionicons name="chevron-forward" size={20} color="#71717a" />
+              </Pressable>
 
-          <Pressable 
-            onPress={() => setIsCalendarVisible(true)}
-            className="flex-row items-center justify-between py-6 border-b border-white/5"
-          >
-            <View className="flex-row items-center gap-4">
-              <Ionicons name="calendar-outline" size={24} color="#71717a" />
-              <Text className="text-white text-lg font-medium">{dateText}</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={20} color="#71717a" />
-          </Pressable>
-        </View>
+              {/* 2. Goal */}
+              <Pressable 
+                onPress={() => router.push({ pathname: '/habit-goal-good', params: configParams })}
+                className="flex-row items-center justify-between py-6 border-b border-white/5"
+              >
+                <View className="flex-row items-center gap-4">
+                  <Ionicons name="locate" size={24} color="#71717a" />
+                  <View>
+                     <Text className="text-[#71717a] text-xs font-bold uppercase mb-1">Goal</Text>
+                     <Text className="text-white text-lg font-medium">{goalText}</Text>
+                  </View>
+                </View>
+                <Ionicons name="chevron-forward" size={20} color="#71717a" />
+              </Pressable>
+
+              {/* 3. Alerts */}
+              <Pressable 
+                onPress={() => router.push({ pathname: '/habit-alerts', params: configParams })}
+                className="flex-row items-center justify-between py-6 border-b border-white/5"
+              >
+                <View className="flex-row items-center gap-4">
+                  <Ionicons name="notifications-outline" size={24} color="#71717a" />
+                  <View>
+                     <Text className="text-[#71717a] text-xs font-bold uppercase mb-1">Reminders</Text>
+                     <Text className="text-white text-lg font-medium">{remindersText}</Text>
+                  </View>
+                </View>
+                <Ionicons name="chevron-forward" size={20} color="#71717a" />
+              </Pressable>
+
+              {/* 4. Start Date */}
+              <Pressable 
+                onPress={() => setIsCalendarVisible(true)}
+                className="flex-row items-center justify-between py-6 border-b border-white/5"
+              >
+                <View className="flex-row items-center gap-4">
+                  <Ionicons name="calendar-outline" size={24} color="#71717a" />
+                  <View>
+                     <Text className="text-[#71717a] text-xs font-bold uppercase mb-1">Start Date</Text>
+                     <Text className="text-white text-lg font-medium">{dateText}</Text>
+                  </View>
+                </View>
+                <Ionicons name="chevron-forward" size={20} color="#71717a" />
+              </Pressable>
+
+              {/* 5. End Date */}
+              <Pressable 
+                onPress={() => router.push({ pathname: '/habit-end-date', params: configParams })}
+                className="flex-row items-center justify-between py-6 border-b border-white/5"
+              >
+                <View className="flex-row items-center gap-4">
+                  <Ionicons name="calendar" size={24} color="#71717a" />
+                  <View>
+                     <Text className="text-[#71717a] text-xs font-bold uppercase mb-1">End Date</Text>
+                     <Text className="text-white text-lg font-medium">{endText}</Text>
+                  </View>
+                </View>
+                <Ionicons name="chevron-forward" size={20} color="#71717a" />
+              </Pressable>
+            </>
+          ) : (
+            <>
+              {/* Bad Habit Customization */}
+              <Pressable 
+                onPress={() => router.push({ pathname: '/habit-goal', params: configParams })}
+                className="flex-row items-center justify-between py-6 border-b border-white/5"
+              >
+                <View className="flex-row items-center gap-4">
+                  <Ionicons name="locate" size={24} color="#71717a" />
+                  <View>
+                     <Text className="text-[#71717a] text-xs font-bold uppercase mb-1">Goal</Text>
+                     <Text className="text-white text-lg font-medium">{goalText}</Text>
+                  </View>
+                </View>
+                <Ionicons name="chevron-forward" size={20} color="#71717a" />
+              </Pressable>
+
+              <Pressable 
+                onPress={() => setIsCalendarVisible(true)}
+                className="flex-row items-center justify-between py-6 border-b border-white/5"
+              >
+                <View className="flex-row items-center gap-4">
+                  <Ionicons name="calendar-outline" size={24} color="#71717a" />
+                  <View>
+                     <Text className="text-[#71717a] text-xs font-bold uppercase mb-1">Start Date</Text>
+                     <Text className="text-white text-lg font-medium">{dateText}</Text>
+                  </View>
+                </View>
+                <Ionicons name="chevron-forward" size={20} color="#71717a" />
+              </Pressable>
+            </>
+          )}
+        </ScrollView>
       </View>
 
       {/* Calendar Modal */}
@@ -242,6 +378,37 @@ export default function HabitConfigScreen() {
               >
                 <Text className="text-white font-bold">Reset to Today</Text>
               </Pressable>
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
+
+      {/* Icon Picker Modal */}
+      <Modal
+        visible={isIconPickerVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setIsIconPickerVisible(false)}
+      >
+        <Pressable 
+          onPress={() => setIsIconPickerVisible(false)}
+          className="flex-1 bg-black/80 items-center justify-center px-5"
+        >
+          <Pressable onPress={(e) => e.stopPropagation()} className="bg-[#1C1C1E] w-full rounded-3xl overflow-hidden border border-white/10 p-6">
+            <Text className="text-white text-xl font-bold mb-6">Choose Icon</Text>
+            <View className="flex-row flex-wrap gap-4 justify-center">
+              {ICON_LIST.map((item) => (
+                <Pressable 
+                  key={item}
+                  onPress={() => {
+                    setIcon(item)
+                    setIsIconPickerVisible(false)
+                  }}
+                  className={`h-12 w-12 rounded-xl items-center justify-center ${icon === item ? 'bg-[#3b82f6]' : 'bg-zinc-800'}`}
+                >
+                  <Ionicons name={item as any} size={24} color="white" />
+                </Pressable>
+              ))}
             </View>
           </Pressable>
         </Pressable>

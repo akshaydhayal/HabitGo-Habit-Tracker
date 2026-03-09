@@ -36,7 +36,10 @@ export const HabitActionSheet = ({ isVisible, onClose }: HabitActionSheetProps) 
           <View className="px-6 pt-2 pb-12 gap-5">
              <Pressable 
                className="flex-row items-center gap-4 py-0 active:opacity-60"
-               onPress={onClose}
+               onPress={() => {
+                 onClose()
+                 router.push('/build-good-habit')
+               }}
              >
                 <View className="h-10 w-10 rounded-full bg-[#3b82f6] items-center justify-center">
                    <Ionicons name="leaf" size={24} color="white" />

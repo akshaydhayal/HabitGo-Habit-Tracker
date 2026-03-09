@@ -17,17 +17,16 @@ const ITEM_HEIGHT = 60
 const VISIBLE_ITEMS = 5
 const PICKER_HEIGHT = ITEM_HEIGHT * VISIBLE_ITEMS
 
-const UNITS = ['times', 'hours', 'minutes', 'steps', 'litres', 'cups', 'km', 'meter', 'kcal', 'cal']
+const UNITS = ['times', 'hours', 'minutes', 'steps', 'litres', 'cups', 'km', 'meter', 'kcal', 'cal', 'pounds', 'µg', 'secs', 'hours', 'millisecs']
 const FREQUENCIES = ['per day', 'per week', 'per month', 'per year']
 const VALUES = Array.from({ length: 500 }, (_, i) => (i + 1).toString())
 
-// Add padding to lists to allow centering first and last items
 const getPaddedData = (data: string[]) => ['', '', ...data, '', '']
 
 const PickerItem = memo(({ item, isSelected }: { item: string, isSelected: boolean }) => (
   <View style={{ height: ITEM_HEIGHT }} className="items-center justify-center">
     <Text className={`text-xl font-bold transition-all duration-75 ${
-      isSelected ? 'text-white scale-125' : 'text-[#71717a] opacity-100 scale-100'
+      isSelected ? 'text-white scale-110' : 'text-[#71717a] opacity-60 scale-100'
     }`}>
       {item}
     </Text>
@@ -45,7 +44,6 @@ const PickerColumn = memo(({
 }) => {
   const flatListRef = useRef<FlatList>(null)
   
-  // Only scroll on initial mount
   useEffect(() => {
     const index = data.indexOf(selectedValue)
     if (index !== -1 && flatListRef.current) {
@@ -66,7 +64,7 @@ const PickerColumn = memo(({
         showsVerticalScrollIndicator={false}
         snapToInterval={ITEM_HEIGHT}
         snapToAlignment="start"
-        decelerationRate={0.998} // Standard momentum for long jumps
+        decelerationRate={0.998}
         onScroll={onScroll}
         scrollEventThrottle={16}
         getItemLayout={(_, index) => ({
@@ -75,7 +73,6 @@ const PickerColumn = memo(({
           index,
         })}
       />
-      {/* Selection Highlight Overlays */}
       <View 
         pointerEvents="none" 
         style={{ height: ITEM_HEIGHT, top: ITEM_HEIGHT * 2 }} 
@@ -85,21 +82,20 @@ const PickerColumn = memo(({
   )
 })
 
-export default function HabitLimitScreen() {
+export default function HabitGoalGoodScreen() {
   const router = useRouter()
   const params = useLocalSearchParams()
   const insets = useSafeAreaInsets()
   
   const [val, setVal] = useState(params.goalValue?.toString() || '1')
   const [unit, setUnit] = useState(params.goalUnit?.toString() || 'times')
-  const [freq, setFreq] = useState(params.goalFrequency?.toString() || 'per week')
+  const [freq, setFreq] = useState(params.goalFrequency?.toString() || 'per day')
 
   const handleSave = () => {
     router.navigate({
       pathname: '/habit-config',
       params: { 
         ...params, 
-        badHabitType: 'limit',
         goalValue: val,
         goalUnit: unit,
         goalFrequency: freq
@@ -136,14 +132,7 @@ export default function HabitLimitScreen() {
         <Text className="text-white text-xl font-bold">Goal</Text>
       </View>
 
-      <View className="px-5 pt-8 gap-4 border-b border-white/5 pb-8 mb-10">
-        <View className="flex-row items-center gap-4">
-          <Ionicons name="arrow-down-outline" size={24} color="#71717a" />
-          <Text className="text-white text-lg font-medium">No More Than</Text>
-        </View>
-      </View>
-
-      <View className="flex-row items-center justify-center">
+      <View className="flex-row items-center justify-center mt-20">
         <View style={{ height: PICKER_HEIGHT }} className="flex-row w-full">
           <PickerColumn 
             data={VALUES} 

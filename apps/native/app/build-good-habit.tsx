@@ -7,7 +7,6 @@ import {
   View,
   Pressable,
   Dimensions,
-  Image,
 } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
@@ -15,21 +14,32 @@ const { width } = Dimensions.get('window')
 const CARD_WIDTH = (width - 48) / 2
 
 const SUGGESTIONS = [
-  { id: 'smoking', title: 'Stop Smoking', color: '#E87A7A', icon: 'flame' },
-  { id: 'drinking', title: 'Stop Drinking', color: '#F8B673', icon: 'wine' },
-  { id: 'junk-food', title: 'Limit Junk Food', color: '#BDB455', icon: 'fast-food' },
-  { id: 'overeating', title: 'Limit Overeating', color: '#7AAAF8', icon: 'restaurant' },
-  { id: 'screen-time', title: 'Limit Screen Time', color: '#68BBE3', icon: 'smartphone' },
-  { id: 'video-games', title: 'Limit Video Game', color: '#668EF8', icon: 'game-controller' },
-  { id: 'shopping', title: 'Limit Shopping', color: '#B088F8', icon: 'cart' },
-  { id: 'nail-biting', title: 'Limit Nail Biting', color: '#F8965E', icon: 'hand-right' },
-  { id: 'masturbation', title: 'Limit Masturbation', color: '#E87A5E', icon: 'heart' },
-  { id: 'time-sitting', title: 'Limit Time Sitting', color: '#808080', icon: 'walk' },
-  { id: 'skipping-meals', title: 'Stop Skipping Meals', color: '#68B48F', icon: 'nutrition' },
-  { id: 'staying-up-late', title: 'Stop Staying Up Late', color: '#3A3A3C', icon: 'moon' },
+  { id: 'meditate', title: 'Meditate', color: '#7AAAF8', icon: 'leaf' },
+  { id: 'running', title: 'Running', color: '#E87A7A', icon: 'fitness' },
+  { id: 'read-books', title: 'Read Books', color: '#F8B673', icon: 'book' },
+  { id: 'journal', title: 'Write in Journal', color: '#BDB455', icon: 'pencil' },
+  { id: 'todo-list', title: 'Set a To-do List', color: '#68BBE3', icon: 'list' },
+  { id: 'gym', title: 'Hit the Gym', color: '#668EF8', icon: 'barbell' },
+  { id: 'swimming', title: 'Swimming', color: '#4FC3F7', icon: 'water' },
+  { id: 'coretraining', title: 'Coretraining', color: '#8884d8', icon: 'body' },
+  { id: 'yoga', title: 'Practise Yoga', color: '#CE93D8', icon: 'accessibility' },
+  { id: 'cardio', title: 'Hit Cardio', color: '#EF5350', icon: 'heart' },
+  { id: 'cycling', title: 'Cycling', color: '#FFA726', icon: 'bicycle' },
+  { id: 'walk', title: 'Go for a Walk', color: '#66BB6A', icon: 'walk' },
+  { id: 'water', title: 'Drink Water', color: '#29B6F6', icon: 'water' },
+  { id: 'sleep', title: 'Get Good Sleep', color: '#5C6BC0', icon: 'moon' },
+  { id: 'limit-sugar', title: 'Limit Sugar', color: '#FF7043', icon: 'cube' },
+  { id: 'fruits', title: 'Eat Fruits', color: '#9CCC65', icon: 'nutrition' },
+  { id: 'limit-caffeine', title: 'Limit Caffeine', color: '#8D6E63', icon: 'cafe' },
+  { id: 'coding', title: 'Practise Coding', color: '#26A69A', icon: 'code' },
+  { id: 'dance', title: 'Just Dance', color: '#EC407A', icon: 'musical-notes' },
+  { id: 'sports', title: 'Play Sports', color: '#FFCA28', icon: 'football' },
+  { id: 'lift-weight', title: 'Lift Weight', color: '#78909C', icon: 'barbell' },
+  { id: 'exercise-time', title: 'Exercise Time', color: '#26C6DA', icon: 'timer' },
+  { id: 'protein', title: 'Protein Intake', color: '#D4E157', icon: 'restaurant' },
 ]
 
-export default function BreakBadHabitScreen() {
+export default function BuildGoodHabitScreen() {
   const router = useRouter()
   const insets = useSafeAreaInsets()
 
@@ -39,22 +49,10 @@ export default function BreakBadHabitScreen() {
         <Pressable onPress={() => router.back()} className="mr-4">
           <Ionicons name="close" size={28} color="white" />
         </Pressable>
-        <Text className="text-white text-xl font-bold">Break Bad Habit</Text>
+        <Text className="text-white text-xl font-bold">Build Good Habit</Text>
       </View>
 
       <ScrollView className="flex-1 px-4 pt-4">
-        <ScrollView 
-          horizontal 
-          showsHorizontalScrollIndicator={false} 
-          className="mb-6"
-        >
-          <View className="flex-row gap-6 border-b border-white/5 pb-2">
-             <Text className="text-[#3b82f6] font-bold text-base">Suggested</Text>
-             <Text className="text-[#71717a] font-medium text-base">Health Connect</Text>
-             <Text className="text-[#71717a] font-medium text-base">Fitness</Text>
-          </View>
-        </ScrollView>
-
         <View className="flex-row flex-wrap justify-between gap-y-4 pb-20">
           {SUGGESTIONS.map((item) => (
             <Pressable
@@ -66,7 +64,7 @@ export default function BreakBadHabitScreen() {
                   name: item.title, 
                   color: item.color, 
                   icon: item.icon,
-                  type: 'bad'
+                  type: 'good'
                 }
               })}
               className="rounded-2xl overflow-hidden p-4 relative"
@@ -90,7 +88,7 @@ export default function BreakBadHabitScreen() {
         <Pressable 
           onPress={() => router.push({
             pathname: '/habit-config',
-            params: { type: 'bad' }
+            params: { type: 'good' }
           })}
           className="bg-[#3b82f6] py-4 rounded-xl items-center shadow-lg shadow-[#3b82f6]/40"
         >

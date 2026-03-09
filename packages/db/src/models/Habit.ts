@@ -12,11 +12,16 @@ export interface IHabit extends Document {
   description?: string;
   type: 'good' | 'bad';
   badHabitType?: 'stop' | 'limit';
+  repeatMode?: 'weekly' | 'monthly';
+  weeklyDays?: string[]; // e.g. ['Mon', 'Tue']
+  monthlyDays?: number[]; // e.g. [1, 15]
+  reminders?: string[]; // e.g. ['08:00', '20:00']
   goalValue?: number;
   goalUnit?: string;
   goalFrequency?: string;
   startDate: string; // YYYY-MM-DD
-  frequency: string[]; // e.g. ['Mon', 'Tue'] or ['Daily']
+  endDate?: string; // YYYY-MM-DD
+  frequency: string[]; // Keep for legacy compatibility
   color?: string;
   history: IHabitDay[];
   createdAt: Date;
@@ -30,10 +35,15 @@ const HabitSchema = new Schema<IHabit>(
     description: { type: String },
     type: { type: String, enum: ['good', 'bad'], default: 'good' },
     badHabitType: { type: String, enum: ['stop', 'limit'] },
+    repeatMode: { type: String, enum: ['weekly', 'monthly'], default: 'weekly' },
+    weeklyDays: { type: [String] },
+    monthlyDays: { type: [Number] },
+    reminders: { type: [String], default: [] },
     goalValue: { type: Number },
     goalUnit: { type: String },
     goalFrequency: { type: String },
     startDate: { type: String, required: true },
+    endDate: { type: String },
     frequency: { type: [String], default: ['Daily'] },
     color: { type: String, default: '#3b82f6' },
     history: [
