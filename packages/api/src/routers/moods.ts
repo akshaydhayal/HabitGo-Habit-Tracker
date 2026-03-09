@@ -12,13 +12,13 @@ const parseUserId = (id: any): string => {
 
 export const moodsRouter = {
   getAll: protectedProcedure
-    .input(z.object({ date: z.string().optional() }))
+    .input(z.object({ date: z.string().optional() }).optional())
     .handler(async ({ input, context }) => {
       const userId = parseUserId(context.session.user.id)
       const query: any = { 
         userId: new mongoose.Types.ObjectId(userId) as any 
       }
-      if (input.date) {
+      if (input?.date) {
         query.date = input.date
       }
       const moods = await Mood.find(query).sort({ time: -1 })

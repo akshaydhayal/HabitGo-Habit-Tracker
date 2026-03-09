@@ -33,7 +33,7 @@ export const HabitActionSheet = ({ isVisible, onClose }: HabitActionSheetProps) 
         >
           <View style={styles.handle} />
           
-          <View className="px-6 pt-2 pb-10 gap-4">
+          <View className="px-6 pt-2 pb-12 gap-5">
              <Pressable 
                className="flex-row items-center gap-4 py-0 active:opacity-60"
                onPress={onClose}
@@ -41,7 +41,7 @@ export const HabitActionSheet = ({ isVisible, onClose }: HabitActionSheetProps) 
                 <View className="h-10 w-10 rounded-full bg-[#3b82f6] items-center justify-center">
                    <Ionicons name="leaf" size={24} color="white" />
                 </View>
-                <Text className="text-white text-xl font-semibold">Create Good Habit</Text>
+                <Text className="text-slate-100 text-xl font-base">Create Good Habit</Text>
              </Pressable>
 
              <Pressable 
@@ -54,7 +54,7 @@ export const HabitActionSheet = ({ isVisible, onClose }: HabitActionSheetProps) 
                 <View className="h-10 w-10 rounded-full bg-zinc-600 items-center justify-center">
                    <Ionicons name="ban" size={28} color="white" />
                 </View>
-                <Text className="text-white text-xl font-semibold">Break Bad Habit</Text>
+                <Text className="text-slate-200 text-xl font-base">Break Bad Habit</Text>
              </Pressable>
 
              <Pressable 
@@ -65,9 +65,9 @@ export const HabitActionSheet = ({ isVisible, onClose }: HabitActionSheetProps) 
                }}
              >
                 <View className="h-10 w-10 rounded-full bg-orange-900 items-center justify-center">
-                   <Ionicons name="happy" size={36} color="#FF9500" />
+                   <Ionicons name="happy" size={36} color="#d18822ff" />
                 </View>
-                <Text className="text-white text-xl font-semibold">Log mood</Text>
+                <Text className="text-slate-200 text-xl font-base">Log mood</Text>
              </Pressable>
           </View>
         </Animated.View>

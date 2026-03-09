@@ -15,6 +15,7 @@ import { Container } from '@/components/container'
 import { authClient } from '@/lib/auth-client'
 import { orpc } from '@/utils/orpc'
 import { HabitActionSheet } from '@/components/habit-action-sheet'
+import { toLocalISOString } from '@/utils/date'
 
 const FILTERS = [
   { id: 'all', label: 'All Habits', icon: 'briefcase' },
@@ -33,7 +34,7 @@ const MOOD_EMOJIS: Record<string, string> = {
 
 export default function JournalScreen() {
   const [activeFilter, setActiveFilter] = useState('all')
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0])
+  const [selectedDate, setSelectedDate] = useState(toLocalISOString(new Date()))
   const [isActionSheetVisible, setIsActionSheetVisible] = useState(false)
   const { data: habits, isLoading: isLoadingHabits } = useQuery(orpc.habits.getAll.queryOptions())
   const { data: moods, isLoading: isLoadingMoods } = useQuery(orpc.moods.getAll.queryOptions({ date: selectedDate }))
@@ -48,7 +49,7 @@ export default function JournalScreen() {
       return {
         day: d.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase(),
         date: d.getDate().toString(),
-        fullDate: d.toISOString().split('T')[0],
+        fullDate: toLocalISOString(d),
       }
     })
   ).current

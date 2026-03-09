@@ -14,6 +14,7 @@ import Animated, { FadeIn, SlideInDown } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { orpc } from '@/utils/orpc'
 import { useQueryClient, useMutation } from '@tanstack/react-query'
+import { toLocalISOString } from '@/utils/date'
 
 const MOODS = [
   { label: 'Terrible', emoji: '😣', color: '#E87A7A' },
@@ -36,7 +37,7 @@ export default function LogMoodScreen() {
   const [selectedActivities, setSelectedActivities] = useState<string[]>([])
   const [context, setContext] = useState('')
 
-  const today = new Date().toISOString().split('T')[0]
+  const today = toLocalISOString(new Date())
   const createMoodMutation = useMutation({
     ...orpc.moods.create.mutationOptions(),
     onSuccess: () => {
@@ -57,7 +58,7 @@ export default function LogMoodScreen() {
 
   const handleSave = () => {
     const now = new Date()
-    const date = now.toISOString().split('T')[0]
+    const date = toLocalISOString(now)
     const time = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
 
     createMoodMutation.mutate({

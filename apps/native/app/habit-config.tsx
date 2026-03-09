@@ -12,6 +12,7 @@ import {
 } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { orpc } from '@/utils/orpc'
+import { toLocalISOString } from '@/utils/date'
 import { useQueryClient, useMutation } from '@tanstack/react-query'
 
 const { width } = Dimensions.get('window')
@@ -29,12 +30,6 @@ export default function HabitConfigScreen() {
   const queryClient = useQueryClient()
   const insets = useSafeAreaInsets()
 
-  const toLocalISOString = (date: Date) => {
-    const y = date.getFullYear()
-    const m = String(date.getMonth() + 1).padStart(2, '0')
-    const d = String(date.getDate()).padStart(2, '0')
-    return `${y}-${m}-${d}`
-  }
   
   const [name, setName] = useState(params.name as string || '')
   const [color, setColor] = useState(params.color as string || '#3b82f6')
